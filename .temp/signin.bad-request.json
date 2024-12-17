@@ -1,0 +1,21 @@
+{
+  "message": [
+    {
+      "property": "password",
+      "children": [],
+      "constraints": {
+        "matches": "Password should have minimum 8 characters, at least one uppercase letter and a number or special character",
+        "minLength": "password must be longer than or equal to 8 characters"
+      }
+    },
+    {
+      "property": "username",
+      "children": [],
+      "constraints": {
+        "minLength": "username must be longer than or equal to 8 characters"
+      }
+    }
+  ],
+  "error": "Bad Request",
+  "statusCode": 400
+}

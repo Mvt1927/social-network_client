@@ -1,0 +1,22 @@
+{
+  "statusCode": 200,
+  "message": "User has been successfully authenticated",
+  "data": {
+    "user": {
+      "id": "cm4p9fxel0000o1189ffwoa9k",
+      "username": "viettel3g100",
+      "email": "v........4@g.......m",
+      "fullname": null,
+      "avatarUrl": null,
+      "bio": null,
+      "isVerified": false,
+      "roles": [
+        "GUEST"
+      ],
+      "createAt": "2024-12-15T07:04:13.534Z",
+      "updateAt": "2024-12-15T07:04:13.534Z"
+    },
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOnsidXNlciI6eyJpZCI6ImNtNHA5ZnhlbDAwMDBvMTE4OWZmd29hOWsiLCJ1c2VybmFtZSI6InZpZXR0ZWwzZzEwMCIsImZ1bGxuYW1lIjpudWxsfX0sImlhdCI6MTczNDI0NjI1MywiZXhwIjoxNzM0MjQ2ODUzLCJpc3MiOiJsb2NhbGhvc3Q6MzMzMyJ9.w80hTHZs3O0WfdRBFx_hIat8pp4TdQin-Ob2h_IyUXU",
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOnsidXNlciI6eyJpZCI6ImNtNHA5ZnhlbDAwMDBvMTE4OWZmd29hOWsifX0sImlhdCI6MTczNDI0NjI1MywiZXhwIjoxNzM0ODUxMDUzLCJpc3MiOiJsb2NhbGhvc3Q6MzMzMyJ9.M_CsFqRUGFSLDR1L7ojUSLTy9FVjPo1_TCipvPsZgfc"
+  }
+}
