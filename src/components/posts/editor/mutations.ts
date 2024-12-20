@@ -1,24 +1,32 @@
-import { useSession } from "@/app/(main)/SessionProvider";
-import { useToast } from "@/components/ui/use-toast";
-import { PostsPage } from "@/lib/types";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { createPost } from "@/apis";
+import { createPostSchema } from "@/dtos/post.dto";
+import { useToast } from "@/hooks/use-toast";
+import { PostData, PostsPage } from "@/lib/types";
+import { useAuthStore } from "@/stores";
 import {
   InfiniteData,
+  Query,
   QueryFilters,
+  QueryKey,
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
-import { submitPost } from "./actions";
+import { z } from "zod";
 
 export function useSubmitPostMutation() {
   const { toast } = useToast();
 
   const queryClient = useQueryClient();
 
-  const { user } = useSession();
+  const { user, access_token } = useAuthStore();
 
   const mutation = useMutation({
-    mutationFn: submitPost,
-    onSuccess: async (newPost) => {
+    mutationFn: async (data: z.infer<typeof createPostSchema>) => {
+      const { response } = await createPost(data, access_token);
+      return response.data;
+    },
+    onSuccess: async newPost => {
       const queryFilter = {
         queryKey: ["post-feed"],
         predicate(query) {
@@ -28,13 +36,13 @@ export function useSubmitPostMutation() {
               query.queryKey.includes(user.id))
           );
         },
-      } satisfies QueryFilters;
+      } satisfies QueryFilters<InfiniteData<PostsPage, string | null>>;
 
       await queryClient.cancelQueries(queryFilter);
 
       queryClient.setQueriesData<InfiniteData<PostsPage, string | null>>(
         queryFilter,
-        (oldData) => {
+        oldData => {
           const firstPage = oldData?.pages[0];
 
           if (firstPage) {
@@ -55,7 +63,7 @@ export function useSubmitPostMutation() {
       queryClient.invalidateQueries({
         queryKey: queryFilter.queryKey,
         predicate(query) {
-          return queryFilter.predicate(query) && !query.state.data;
+          return queryFilter.predicate(query as Query<InfiniteData<PostsPage, string | null>, Error, InfiniteData<PostsPage, string | null>, QueryKey>) && !query.state.data;
         },
       });
 

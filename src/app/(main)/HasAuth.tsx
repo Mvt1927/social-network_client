@@ -1,39 +1,34 @@
 "use client"
 
-import { Button } from "@/components/ui/button";
+import PostEditor from "@/components/posts/editor/PostEditor";
 import { TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useAuthStore } from "@/stores";
 import { Tabs } from "@radix-ui/react-tabs";
+import FollowingFeed from "./FollowingFeed";
+import ForYouFeed from "./ForYouFeed";
 
 function HasAuth() {
 
-  const authStore = useAuthStore();
 
   return (
-    <main className="flex w-full min-w-0 gap-5">
-      <div className="w-full min-w-0 space-y-5">
-        {/* <PostEditor /> */}
-        <Tabs defaultValue="for-you">
-          <TabsList>
-            <TabsTrigger value="for-you">For you</TabsTrigger>
-            <TabsTrigger value="following">Following</TabsTrigger>
-          </TabsList>
-          <TabsContent value="for-you">
-            {/* <ForYouFeed /> */}
-            <div>
-              For you feed
-            </div>
-          </TabsContent>
-          <TabsContent value="following">
-            {/* <FollowingFeed /> */}
-            <div>
-              Following feed
-            </div>
-          </TabsContent>
-        </Tabs>
-      </div>
-      {/* <TrendsSidebar /> */}
-    </main>
+   
+      <main className="flex w-full min-w-0 gap-6 max-w-xl">
+        <div className="container min-w-0 space-y-5">
+          <PostEditor />
+          <Tabs className="w-full" defaultValue="for-you">
+            <TabsList className="w-full flex">
+              <TabsTrigger className="w-full" value="for-you">For you</TabsTrigger>
+              <TabsTrigger className="w-full" value="following">Following</TabsTrigger>
+            </TabsList>
+            <TabsContent value="for-you">
+              <ForYouFeed />
+            </TabsContent>
+            <TabsContent value="following">
+              <FollowingFeed />
+            </TabsContent>
+          </Tabs>
+        </div>
+        {/* <TrendsSidebar /> */}
+      </main>
   );
 }
 

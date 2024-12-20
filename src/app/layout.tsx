@@ -1,7 +1,11 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import "@copilotkit/react-textarea/styles.css";
+import "@copilotkit/react-ui/styles.css";
 import { ThemeProvider } from "@/hooks/theme-provider";
+import { Toaster } from "@/components/ui/toaster";
+import ReactQueryProvider from "./ReactQueryProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -38,15 +42,18 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-        >
-          <div className="relative flex min-h-screen flex-col items-center">
-              {children}
-          </div>
-        </ThemeProvider>
+          <ReactQueryProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+            >
+              <div className="relative flex min-h-screen flex-col items-center">
+                {children}
+              </div>
+              <Toaster />
+            </ThemeProvider>
+          </ReactQueryProvider>
       </body>
     </html>
   );

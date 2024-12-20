@@ -1,11 +1,16 @@
-import { useToast } from "@/components/ui/use-toast";
-// import { useUploadThing } from "@/lib/uploadthing";
+import { useToast } from "@/hooks/use-toast";
+import { useUploadThing } from "@/lib/uploadthing";
+import { useAuthStore } from "@/stores";
 import { useState } from "react";
+import { ClientUploadedFileData } from "uploadthing/types";
 
 export interface Attachment {
   file: File;
-  mediaId?: string;
   isUploading: boolean;
+  data?: ClientUploadedFileData<{
+    url: string;
+    type: string;
+  }>;
 }
 
 export default function useMediaUpload() {
@@ -15,9 +20,17 @@ export default function useMediaUpload() {
 
   const [uploadProgress, setUploadProgress] = useState<number>();
 
+  const authStore = useAuthStore();
+
   const { startUpload, isUploading } = useUploadThing("attachment", {
+    headers() {
+      return {
+        "x-user-id": `${authStore.user?.id}`,
+        "x-access-token": `${authStore.access_token}`,
+      };
+    },
     onBeforeUploadBegin(files) {
-      const renamedFiles = files.map((file) => {
+      const renamedFiles = files.map(file => {
         const extension = file.name.split(".").pop();
         return new File(
           [file],
@@ -28,31 +41,31 @@ export default function useMediaUpload() {
         );
       });
 
-      setAttachments((prev) => [
+      setAttachments(prev => [
         ...prev,
-        ...renamedFiles.map((file) => ({ file, isUploading: true })),
+        ...renamedFiles.map(file => ({ file, isUploading: true })),
       ]);
 
       return renamedFiles;
     },
     onUploadProgress: setUploadProgress,
     onClientUploadComplete(res) {
-      setAttachments((prev) =>
-        prev.map((a) => {
-          const uploadResult = res.find((r) => r.name === a.file.name);
+      setAttachments(prev =>
+        prev.map(a => {
+          const uploadResult = res.find(r => r.name === a.file.name);
 
           if (!uploadResult) return a;
 
           return {
             ...a,
-            mediaId: uploadResult.serverData.mediaId,
+            data: uploadResult,
             isUploading: false,
           };
         }),
       );
     },
     onUploadError(e) {
-      setAttachments((prev) => prev.filter((a) => !a.isUploading));
+      setAttachments(prev => prev.filter(a => !a.isUploading));
       toast({
         variant: "destructive",
         description: e.message,
@@ -61,6 +74,13 @@ export default function useMediaUpload() {
   });
 
   function handleStartUpload(files: File[]) {
+    if (!authStore.user) {
+      toast({
+        variant: "destructive",
+        description: "You must be logged in to upload attachments.",
+      });
+    }
+
     if (isUploading) {
       toast({
         variant: "destructive",
@@ -81,7 +101,7 @@ export default function useMediaUpload() {
   }
 
   function removeAttachment(fileName: string) {
-    setAttachments((prev) => prev.filter((a) => a.file.name !== fileName));
+    setAttachments(prev => prev.filter(a => a.file.name !== fileName));
   }
 
   function reset() {

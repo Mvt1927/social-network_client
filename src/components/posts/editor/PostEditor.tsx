@@ -1,20 +1,35 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import UserAvatar from "@/components/UserAvatar";
 import { useAuthStore } from "@/stores";
-import { ClipboardEvent } from "react";
-import { useEditor, EditorContent } from '@tiptap/react'
+import { ClipboardEvent, use, useEffect, useRef, useState } from "react";
+// import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import LoadingButton from "@/components/LoadingButton";
-import { Loader2 } from "lucide-react";
+import { ImageIcon, Loader2, X } from "lucide-react";
 import Placeholder from "@tiptap/extension-placeholder";
-import useMediaUpload from "./useMediaUpload";
-
+import useMediaUpload, { Attachment } from "./useMediaUpload";
+import { useSubmitPostMutation } from "./mutations";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import Image from "next/image";
+import { useDropzone } from "@uploadthing/react";
+import { Card } from "@/components/ui/card";
+// import EditorToolbar from "@/components/rich-text/toolbar/editor-toolbar";
+import { TextAreaComponent } from "@/components/TextAreaComponent";
+import { useEditor } from "@tiptap/react";
+import { ScrollBarStyle } from "@/components/ui/scroll-bar";
+import { ScrollArea } from "@radix-ui/react-scroll-area";
+import { Carousel, CarouselApi, CarouselContent, CarouselItem } from "@/components/ui/carousel";
+import { url } from "inspector";
+import { convertStringToMediaType } from "@/lib/types";
+import { mediaSchema } from "@/dtos/media.dto";
 
 export default function PostEditor() {
   const { user } = useAuthStore();
 
-  // const mutation = useSubmitPostMutation();
+  const mutation = useSubmitPostMutation();
 
   const {
     startUpload,
@@ -25,94 +40,96 @@ export default function PostEditor() {
     reset: resetMediaUploads,
   } = useMediaUpload();
 
-  // const { getRootProps, getInputProps, isDragActive } = useDropzone({
-  //   onDrop: startUpload,
-  // });
-
-  // const { onClick, ...rootProps } = getRootProps();
-
-  const editor = useEditor({
-    extensions: [
-      StarterKit.configure({
-        bold: false,
-        italic: false,
-      }),
-      Placeholder.configure({
-        placeholder: "What's crack-a-lackin'?",
-      }),
-    ],
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop: startUpload,
   });
 
-  const input =
-    editor?.getText({
-      blockSeparator: "\n",
-    }) || "";
+  const { onClick, ...rootProps } = getRootProps();
+
+  const [input, setInput] = useState("");
 
   function onSubmit() {
-    // mutation.mutate(
-    //   {
-    //     content: input,
-    //     mediaIds: attachments.map((a) => a.mediaId).filter(Boolean) as string[],
-    //   },
-    //   {
-    //     onSuccess: () => {
-    //       editor?.commands.clearContent();
-    //       resetMediaUploads();
-    //     },
-    //   },
-    // );
+    const inputAttachments = attachments.map(({ data }) => {
+      const attachment = mediaSchema.parse({
+        url: data?.url,
+        type: convertStringToMediaType(data?.type),
+      })
+
+      return attachment;
+    });
+
+    mutation.mutate(
+      {
+        content: input,
+        attachments: inputAttachments,
+      },
+      {
+        onSuccess: () => {
+          setInput("");
+          resetMediaUploads();
+        },
+      },
+    );
+
+    console.log(attachments);
   }
 
   function onPaste(e: ClipboardEvent<HTMLInputElement>) {
     const files = Array.from(e.clipboardData.items)
       .filter((item) => item.kind === "file")
       .map((item) => item.getAsFile()) as File[];
-    // startUpload(files);
+    startUpload(files);
   }
 
   return (
-    <div className="flex flex-col gap-5 rounded-2xl bg-card p-5 shadow-sm">
-      <div className="flex gap-5">
-        <UserAvatar avatarUrl={user.avatarUrl} className="hidden sm:inline" />
-        <div {...rootProps} className="w-full">
-          <EditorContent
-            editor={editor}
-            className={cn(
-              "max-h-[20rem] w-full overflow-y-auto rounded-2xl bg-background px-5 py-3",
-              isDragActive && "outline-dashed",
-            )}
-            onPaste={onPaste}
+    <Card>
+      <div className="flex flex-col gap-5 rounded-2xl bg-card p-5 shadow-sm  ">
+        <div className="flex gap-5">
+          <UserAvatar avatarUrl={user.avatarUrl} className="hidden sm:inline" />
+          <div {...rootProps} className="w-full">
+            <TextAreaComponent
+
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              className={cn(isDragActive && "border-dashed")}
+              onPaste={onPaste}
+              disableBranding
+              autosuggestionsConfig={{
+                textareaPurpose: "Assist me in replying to this email thread. Remember all important details",
+                chatApiConfigs: {
+                },
+              }} />
+            <input {...getInputProps()} />
+          </div>
+        </div>
+        {!!attachments.length && (
+          <AttachmentPreviews
+            attachments={attachments}
+            removeAttachment={removeAttachment}
           />
-          <input {...getInputProps()} />
+        )}
+        <div className="flex items-center justify-end gap-3">
+          {isUploading && (
+            <>
+              <span className="text-sm">{uploadProgress ?? 0}%</span>
+              <Loader2 className="size-5 animate-spin text-primary" />
+            </>
+          )}
+          <AddAttachmentsButton
+            onFilesSelected={startUpload}
+            disabled={isUploading || attachments.length >= 5}
+          />
+          <LoadingButton
+            onClick={onSubmit}
+            loading={mutation.isPending}
+            disabled={!input.trim() || isUploading}
+            className="min-w-20"
+          >
+            Post
+          </LoadingButton>
         </div>
       </div>
-      {!!attachments.length && (
-        <AttachmentPreviews
-          attachments={attachments}
-          removeAttachment={removeAttachment}
-        />
-      )}
-      <div className="flex items-center justify-end gap-3">
-        {isUploading && (
-          <>
-            <span className="text-sm">{uploadProgress ?? 0}%</span>
-            <Loader2 className="size-5 animate-spin text-primary" />
-          </>
-        )}
-        <AddAttachmentsButton
-          onFilesSelected={startUpload}
-          disabled={isUploading || attachments.length >= 5}
-        />
-        <LoadingButton
-          onClick={onSubmit}
-          loading={mutation.isPending}
-          disabled={!input.trim() || isUploading}
-          className="min-w-20"
-        >
-          Post
-        </LoadingButton>
-      </div>
-    </div>
+    </Card>
   );
 }
 
@@ -165,21 +182,56 @@ function AttachmentPreviews({
   attachments,
   removeAttachment,
 }: AttachmentPreviewsProps) {
+
+  const [api, setApi] = useState<CarouselApi>()
+  const [current, setCurrent] = useState(0)
+
+  useEffect(() => {
+    if (!api) {
+      return
+    }
+    setCurrent(api.selectedScrollSnap() + 1)
+  
+  }, [api, attachments.length])
+
+  useEffect(() => {
+    if (!api) {
+      return
+    }
+    api.scrollTo(attachments.length - 1 , true)
+    
+  }, [attachments.length])
+
+  useEffect(() => {
+    if (!api) {
+      return
+    }
+
+    api.on("select", () => {
+      setCurrent(api.selectedScrollSnap() + 1)
+    })
+  }, [api])
+
   return (
-    <div
-      className={cn(
-        "flex flex-col gap-3",
-        attachments.length > 1 && "sm:grid sm:grid-cols-2",
-      )}
+    <Carousel
+      setApi={setApi}
     >
-      {attachments.map((attachment) => (
-        <AttachmentPreview
-          key={attachment.file.name}
-          attachment={attachment}
-          onRemoveClick={() => removeAttachment(attachment.file.name)}
-        />
-      ))}
-    </div>
+      <CarouselContent>
+        {attachments.map((attachment, index) => (
+          <CarouselItem key={index}>
+            <AttachmentPreview
+              key={attachment.file.name}
+              attachment={attachment}
+              onRemoveClick={() => removeAttachment(attachment.file.name)}
+            />
+          </CarouselItem>
+        ))}
+
+      </CarouselContent>
+      <div className="py-2 text-center text-sm text-muted-foreground">
+        File {current} of {attachments.length}
+      </div>
+    </Carousel>
   );
 }
 
@@ -189,7 +241,7 @@ interface AttachmentPreviewProps {
 }
 
 function AttachmentPreview({
-  attachment: { file, mediaId, isUploading },
+  attachment: { file, isUploading },
   onRemoveClick,
 }: AttachmentPreviewProps) {
   const src = URL.createObjectURL(file);
