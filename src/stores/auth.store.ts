@@ -1,13 +1,14 @@
-'use client'
+"use client";
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { z } from "zod";
 
-import { login, refresh, register } from "@/apis";
+import { login, refresh, register, requestVerify, verify } from "@/apis";
 import {
   AxiosResponseErrorData,
   loginFormSchema,
+  otpFormSchema,
   registerFormSchema,
   User,
 } from "@/dtos";
@@ -32,6 +33,13 @@ export interface IAuthStore {
   fetchRegister(
     data: z.infer<typeof registerFormSchema>,
   ): Promise<{ error: AxiosResponseErrorData | undefined }>;
+
+  fetchVerify: (
+    data: z.infer<typeof otpFormSchema>,
+  ) => Promise<{ error: AxiosResponseErrorData | undefined }>;
+  fetchRequestVerify: (data: {
+    email: string;
+  }) => Promise<{ error: AxiosResponseErrorData | undefined }>;
 
   validateToken: () => Promise<boolean>;
   fethRefreshToken: () => Promise<boolean>;
@@ -130,34 +138,62 @@ export const useAuthStore = create<IAuthStore>()(
         return { error: error };
       },
 
+      fetchVerify: async data => {
+        const { error } = await verify(data.code, get().access_token);
+
+        if (error) {
+          const { response } = error;
+          return { error: response?.data };
+        }
+
+        set({
+          user: {
+            ...get().user,
+            isVerified: true,
+          },
+        });
+        return { error: error };
+      },
+      fetchRequestVerify: async data => {
+        const { error } = await requestVerify(data.email, get().access_token);
+
+        if (error) {
+          const { response } = error;
+          return { error: response?.data };
+        }
+
+        return { error: error };
+      },
+
       validateToken: async () => {
         if (
           (get().access_token &&
-            Date.now() < get().access_token_expires_in * 1000) ||
+            Date.now() < (get().access_token_expires_in * 1000 - 60)) ||
           (get().refresh_token &&
             Date.now() < get().refresh_token_expires_in * 1000 &&
             (await get().fethRefreshToken()))
         ) {
+          console.log("token is valid");
           return true;
         }
-
         get().clearAuth();
         return false;
       },
 
       fethRefreshToken: async () => {
+        console.log("refreshing token");
         const { error, response } = await refresh(get().refresh_token);
 
         if (error) {
           return false;
         }
 
-        const { token, refreshToken, user } = response.data?.data;
+        const { token, refreshToken } = response.data?.data;
+
+        console.log(response.data);
 
         get().setAccessToken(token);
         get().setRefreshToken(refreshToken);
-        set({ user });
-
         return true;
       },
 
@@ -190,10 +226,9 @@ export const useAuthStore = create<IAuthStore>()(
     }),
     {
       name: "auth",
-      onRehydrateStorage: () => (state) => ({
+      onRehydrateStorage: () => state => ({
         ...state,
-      })
-      
+      }),
     },
   ),
 );

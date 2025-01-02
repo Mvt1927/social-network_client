@@ -86,9 +86,8 @@ export default function PostEditor() {
       <div className="flex flex-col gap-5 rounded-2xl bg-card p-5 shadow-sm  ">
         <div className="flex gap-5">
           <UserAvatar avatarUrl={user.avatarUrl} className="hidden sm:inline" />
-          <div {...rootProps} className="w-full">
+          <div {...rootProps} className="flex-1">
             <TextAreaComponent
-
               value={input}
               onChange={(e) => setInput(e.target.value)}
               className={cn(isDragActive && "border-dashed")}

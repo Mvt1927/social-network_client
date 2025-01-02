@@ -18,7 +18,7 @@ const nextConfig: NextConfig = {
         destination: "/search?q=%23:tag",
       },
     ];
-  },
+  }
 };
 
 export default nextConfig;

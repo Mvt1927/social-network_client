@@ -8,7 +8,6 @@ export interface Constraints {
   [key: string]: string;
 }
 
-
 export interface AxiosResponseSuccessData<T> {
   statusCode: number;
   message: string;
@@ -17,16 +16,24 @@ export interface AxiosResponseSuccessData<T> {
 
 export interface AxiosResponseErrorData {
   statusCode: number;
-  message: ErrorMessage[] | string;
+  message: ErrorMessage[] | string
   error: string;
 }
 
-export type AxiosResponseData<T> = AxiosResponseSuccessData<T> | AxiosResponseErrorData;
+export interface TokenExpiredError {
+  expiredAt: string;
+  message: string;
+  name: "TokenExpiredError";
+}
 
-const test: AxiosResponseData<string> ={
+export type AxiosResponseData<T> =
+  | AxiosResponseSuccessData<T>
+  | AxiosResponseErrorData;
+
+const test: AxiosResponseData<string> = {
   statusCode: 404,
   message: "test",
   data: "test",
 };
 
-console.log(test)
+console.log(test);

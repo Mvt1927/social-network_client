@@ -18,31 +18,30 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import LoadingButton from "@/components/LoadingButton"
 import { useTransition } from "react"
 import { useAuthStore } from "@/stores"
-import { loginFormSchema } from "@/dtos"
 import { toast } from "@/hooks/use-toast"
-import { PasswordInput } from "./ui/input-password"
+import { requestVerifyFormSchema } from "@/dtos"
+import { redirect } from "next/navigation"
 
-export function LoginForm() {
+export function RequestVerifyForm() {
 
   const [isPending, startTransition] = useTransition();
 
-  const form = useForm<z.infer<typeof loginFormSchema>>({
-    resolver: zodResolver(loginFormSchema),
+  const form = useForm<z.infer<typeof requestVerifyFormSchema>>({
+    resolver: zodResolver(requestVerifyFormSchema),
     defaultValues: {
-      username: "",
-      password: "",
+      email: "",
     }
   })
 
   const authStore = useAuthStore();
 
-  function handleSubmit(data: z.infer<typeof loginFormSchema>) {
+  function handleSubmit(data: z.infer<typeof requestVerifyFormSchema>) {
     startTransition(async () => {
-      const { error } = await authStore.fetchLogin(data);
+      const { error } = await authStore.fetchRequestVerify(data);
 
       if (error) {
         if (typeof error.message === "string") {
-          form.setError("username", {
+          form.setError("email", {
             type: "manual",
             message: error.message,
           });
@@ -51,20 +50,14 @@ export function LoginForm() {
             description: error.message,
           })
         } else {
-          error.message.forEach((error) => {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            form.setError(error.property as any, {
-              type: "manual",
-              message: Object.values(error.constraints).join(", "),
-            });
-            toast({
-              variant: "destructive",
-              description: Object.values(error.constraints).join(", "),
-            })
-          })
+          form.setError("email", {
+            type: "manual",
+            message: "Something went wrong",
+          });
+          redirect("/login")
         }
-
-
+      }else{
+        redirect("/verify-email");
       }
     });
   }
@@ -74,20 +67,20 @@ export function LoginForm() {
       <form onSubmit={form.handleSubmit(handleSubmit)} >
         <Card className="mx-auto min-w-80 max-w-sm">
           <CardHeader>
-            <CardTitle className="text-2xl">Login</CardTitle>
+            <CardTitle className="text-2xl">Request verify</CardTitle>
             <CardDescription>
-              Enter your Account to login
+              Enter your Email to verify your account
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4">
             <FormField
               control={form.control}
-              name="username"
+              name="email"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel >
                     <div className="text-sm">
-                      Username
+                      Email
                     </div>
                   </FormLabel>
                   <FormControl>
@@ -97,32 +90,15 @@ export function LoginForm() {
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex">
-                    <div className="flex-1 text-sm">
-                      Password
-                    </div>
-                    <Link href="/forgot-password" className="hover:underline text-sm">Forgot password?</Link></FormLabel>
-                  <FormControl>
-                    <PasswordInput {...field} placeholder="Password" required />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
           </CardContent>
           <CardFooter className="grid gap-4">
             <LoadingButton loading={isPending} type="submit" className="w-full">
-              Login
+              Send Request
             </LoadingButton>
             <div className="text-center text-sm">
-              Don&apos;t have an account?{" "}
-              <Link href="/signup" className="underline">
-                Sign up
+              You have an code?{" "}
+              <Link href="/verify-email" className="underline">
+                Verify now
               </Link>
             </div>
           </CardFooter>

@@ -70,3 +70,11 @@ export const registerFormSchema = z
     message: "Passwords do not match",
     path: ["confirmPassword"],
   });
+
+export const otpFormSchema = z.object({
+  code: z.string().min(6).nonempty("Code is required"),
+});
+
+export const requestVerifyFormSchema = z.object({
+  email: z.string().email("Invalid email address"),
+});

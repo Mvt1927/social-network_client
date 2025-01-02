@@ -1,12 +1,9 @@
 "use client";
 
 import InfiniteScrollContainer from "@/components/InfiniteScrollContainer";
-// import Post from "@/components/posts/Post";
-// import PostsLoadingSkeleton from "@/components/posts/PostsLoadingSkeleton";
-// import kyInstance from "@/lib/ky";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
-import Loading from "./loading";
+import Loading from "../app/(main)/loading";
 import { getPost } from "@/apis";
 import { useAuthStore } from "@/stores";
 import Post from "@/components/posts/Post";
@@ -14,7 +11,6 @@ import Post from "@/components/posts/Post";
 export default function ForYouFeed() {
 
   const { access_token } = useAuthStore();
-
   const {
     data,
     fetchNextPage,
@@ -25,17 +21,20 @@ export default function ForYouFeed() {
   } = useInfiniteQuery({
     queryKey: ["post-feed", "for-you"],
     queryFn: async ({ pageParam }) => {
+
       const { response } = await getPost({
-        value: ""
+        value: "FOR_YOU"
       }, access_token, pageParam
       )
       return response.data
     },
+
     initialPageParam: null as string | null,
     getNextPageParam: (lastPage) => lastPage?.nextCursor,
   });
 
   const posts = data?.pages.flatMap((page) => page.posts) || [];
+
 
   if (status === "pending") {
     return <Loading />;
@@ -50,6 +49,8 @@ export default function ForYouFeed() {
   }
 
   if (status === "error") {
+
+    // if(error.name === "UnauthorizedError") {
     return (
       <p className="text-center text-destructive">
         An error occurred while loading posts.

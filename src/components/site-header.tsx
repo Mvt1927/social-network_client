@@ -1,9 +1,10 @@
 "use client"
 
 import Link from "next/link";
-import { buttonVariants } from "./ui/button";
 import { Icons } from "./ui/icons";
 import { ThemeToggle } from "./theme-toggle";
+import { LogOut } from "lucide-react";
+import { Button } from "./ui/button";
 
 function SiteHeader() {
 
@@ -18,21 +19,15 @@ function SiteHeader() {
                 </div>
                 <div className="flex flex-1 items-center justify-end space-x-4">
                     <nav className="flex items-center space-x-1">
-                        <Link
-                            href={"https://github.com/Mvt1927"}
-                            target="_blank"
-                            rel="noreferrer"
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            asChild
                         >
-                            <div
-                                className={buttonVariants({
-                                    size: "icon",
-                                    variant: "ghost",
-                                })}
-                            >
-                                <Icons.gitHub className="size-5" />
-                                <span className="sr-only">GitHub</span>
-                            </div>
-                        </Link>
+                            <Link href="/logout" className="flex items-center space-x-2">
+                                <LogOut className="h-6 w-6" />
+                            </Link>
+                        </Button>
                         <ThemeToggle />
                     </nav>
                 </div>

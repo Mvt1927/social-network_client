@@ -24,7 +24,10 @@ export default function MessagesButton({ initialState }: MessagesButtonProps) {
 
   const { data } = useQuery({
     queryKey: ["unread-messages-count"],
-    queryFn: () => getUnreadMessagesCount(access_token),
+    queryFn: async () => {
+
+      return getUnreadMessagesCount(access_token)
+    },
     initialData: initialState,
     refetchInterval: 60 * 1000,
   });

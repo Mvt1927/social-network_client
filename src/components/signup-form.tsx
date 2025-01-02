@@ -18,6 +18,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useAuthStore } from "@/stores"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "./ui/form"
 import LoadingButton from "./LoadingButton"
+import { PasswordInput } from "./ui/input-password";
 
 export function SignupForm() {
 
@@ -37,7 +38,7 @@ export function SignupForm() {
 
   function handleSubmit(data: z.infer<typeof registerFormSchema>) {
     startTransition(async () => {
-      const { error } = await authStore.fetchLogin(data);
+      const { error } = await authStore.fetchRegister(data);
 
       if (error) {
         if (typeof error.message === "string") {
@@ -115,7 +116,7 @@ export function SignupForm() {
                     </div>
                   </FormLabel>
                   <FormControl>
-                    <Input {...field} type="password" placeholder="Password" required />
+                    <PasswordInput {...field} placeholder="Password" required />
                   </FormControl>
                   <FormMessage className="max-w-full" />
                 </FormItem>
@@ -132,7 +133,7 @@ export function SignupForm() {
                     </div>
                   </FormLabel>
                   <FormControl>
-                    <Input {...field} type="password" placeholder="Password" required />
+                    <PasswordInput {...field} type="password" placeholder="Password" required />
                   </FormControl>
                   <FormMessage className="max-w-full" />
                 </FormItem>

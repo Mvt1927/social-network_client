@@ -108,6 +108,19 @@ export const notificationsInclude = {
       message: true,
     },
   },
+  chat: {
+    select: {
+      id: true,
+      authorId: true,
+    },
+  },
+  groupChat: {
+    select: {
+      id: true,
+      authorId: true,
+      groupId: true,
+    },
+  },
 } satisfies Prisma.NotificationInclude;
 
 export type NotificationData = Prisma.NotificationGetPayload<{

@@ -12,8 +12,7 @@ function VerifyAuth() {
     const validate = async () => {
       if (await authStore.validateToken()) {
         //get path from url nextjs
-        
-        redirect("/")
+        redirect("/home")
       }
     }
     validate();

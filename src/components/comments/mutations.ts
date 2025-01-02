@@ -9,6 +9,7 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
+import { redirect } from "next/navigation";
 import { z } from "zod";
 
 export function useSubmitCommentMutation(postId: string) {
@@ -16,10 +17,20 @@ export function useSubmitCommentMutation(postId: string) {
 
   const queryClient = useQueryClient();
 
-  const { access_token } = useAuthStore();
+  const { access_token, validateToken } = useAuthStore();
 
   const mutation = useMutation({
     mutationFn: async (data: z.infer<typeof createCommentSchema>) => {
+
+      if (!(await validateToken())) {
+        toast({
+          variant: "destructive",
+          description: "Your session has expired. Please log in again.",
+        })
+        redirect("/")
+      }
+
+
       const { response } = await createComment(postId, data, access_token);
       return response.data;
     },

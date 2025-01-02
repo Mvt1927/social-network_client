@@ -33,16 +33,19 @@ export const getPost = async (
 ) => {
   try {
     return {
-      response: await AXIOS.get<PostsPage>(`${subdirectory}/${data.value}`, {
-        headers: {
-          Authorization: `Bearer ${access_token}`,
+      response: await AXIOS.get<PostsPage>(
+        `${subdirectory}${data.value ? "?postType=" + data.value : ""}`,
+        {
+          headers: {
+            Authorization: `Bearer ${access_token}`,
+          },
+          params: pageParams
+            ? {
+                cursor: pageParams,
+              }
+            : undefined,
         },
-        params: pageParams
-          ? {
-              cursor: pageParams,
-            }
-          : undefined,
-      }),
+      ),
     };
   } catch (error: unknown) {
     throw error;
@@ -63,7 +66,11 @@ export const deletePost = async (postId: string, access_token: string) => {
   }
 };
 
-export const updatePost = async (postId: string, data: z.infer<typeof createPostSchema>, access_token: string) => {
+export const updatePost = async (
+  postId: string,
+  data: z.infer<typeof createPostSchema>,
+  access_token: string,
+) => {
   try {
     return {
       response: await AXIOS.put<PostData>(`${subdirectory}/${postId}`, data, {
@@ -72,9 +79,7 @@ export const updatePost = async (postId: string, data: z.infer<typeof createPost
         },
       }),
     };
-  }
-  catch (error: unknown) {
+  } catch (error: unknown) {
     throw error;
   }
-}
-
+};

@@ -1,17 +1,18 @@
 "use client";
 
 import InfiniteScrollContainer from "@/components/InfiniteScrollContainer";
+import Post from "@/components/posts/Post";
 import PostsLoadingSkeleton from "@/components/posts/PostsLoadingSkeleton";
+import kyInstance from "@/lib/ky";
+import { PostsPage } from "@/lib/types";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
-import { useAuthStore } from "@/stores";
-import { getPost } from "@/apis";
-import Post from "@/components/posts/Post";
 
-export default function FollowingFeed() {
+interface UserPostsProps {
+  userId: string;
+}
 
-  const { access_token } = useAuthStore();
-
+export default function UserPosts({ userId }: UserPostsProps) {
   const {
     data,
     fetchNextPage,
@@ -20,14 +21,14 @@ export default function FollowingFeed() {
     isFetchingNextPage,
     status,
   } = useInfiniteQuery({
-    queryKey: ["post-feed", "following"],
-    queryFn: async ({ pageParam }) => {
-      const { response } = await getPost({
-        value: ""
-      }, access_token, pageParam
-      )
-      return response.data
-    },
+    queryKey: ["post-feed", "user-posts", userId],
+    queryFn: ({ pageParam }) =>
+      kyInstance
+        .get(
+          `/api/users/${userId}/posts`,
+          pageParam ? { searchParams: { cursor: pageParam } } : {},
+        )
+        .json<PostsPage>(),
     initialPageParam: null as string | null,
     getNextPageParam: (lastPage) => lastPage.nextCursor,
   });
@@ -41,7 +42,7 @@ export default function FollowingFeed() {
   if (status === "success" && !posts.length && !hasNextPage) {
     return (
       <p className="text-center text-muted-foreground">
-        No posts found. Start following people to see their posts here.
+        This user hasn&apos;t posted anything yet.
       </p>
     );
   }
