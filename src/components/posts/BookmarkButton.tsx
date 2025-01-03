@@ -1,6 +1,8 @@
+import { bookmarkPost, getBookmarkInfo, unbookmarkPost } from "@/apis";
 import { useToast } from "@/hooks/use-toast";
 import { BookmarkInfo } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { useAuthStore } from "@/stores";
 import {
   QueryKey,
   useMutation,
@@ -24,19 +26,36 @@ export default function BookmarkButton({
 
   const queryKey: QueryKey = ["bookmark-info", postId];
 
+  const { access_token } = useAuthStore();
+
+  const fetchBookmarkInfo = async () => {
+    const { response } = await getBookmarkInfo(postId, access_token);
+    return response.data;
+  }
+
+  const fetchBookmarkPost = async () => {
+    await bookmarkPost(postId, access_token);
+    return undefined
+  }
+
+  const fetchUnbookmarkPost = async () => {
+    await unbookmarkPost(postId, access_token);
+    return undefined
+  }
+
   const { data } = useQuery({
     queryKey,
-    // queryFn: () =>
-    //   kyInstance.get(`/api/posts/${postId}/bookmark`).json<BookmarkInfo>(),
+    queryFn: () =>
+      fetchBookmarkInfo(),
     initialData: initialState,
     staleTime: Infinity,
   });
 
   const { mutate } = useMutation({
-    // mutationFn: () =>
-    //   data.isBookmarkedByUser
-    //     ? kyInstance.delete(`/api/posts/${postId}/bookmark`)
-    //     : kyInstance.post(`/api/posts/${postId}/bookmark`),
+    mutationFn: () =>
+      data.isBookmarkedByUser
+        ? fetchUnbookmarkPost()
+        : fetchBookmarkPost(),
     onMutate: async () => {
       toast({
         description: `Post ${data.isBookmarkedByUser ? "un" : ""}bookmarked`,

@@ -57,7 +57,7 @@ export function OTPForm() {
         toast({
           variant: "default",
           description: "Email verified",})
-        redirect("/");
+        redirect("/home");
       }
     });
   }

@@ -12,8 +12,10 @@ import { useEffect } from "react";
 import Notification from "./Notification";
 import { getNotifications, markNotificationsAsRead } from "@/apis/notification.api";
 import { useAuthStore } from "@/stores";
+import dynamic from "next/dynamic";
+import Loading from "../../loading";
 
-export default function Notifications() {
+function Notifications() {
   
   const { access_token } = useAuthStore();
   
@@ -85,4 +87,6 @@ export default function Notifications() {
       {isFetchingNextPage && <Loader2 className="mx-auto my-3 animate-spin" />}
     </InfiniteScrollContainer>
   );
+
 }
+export default dynamic(() => Promise.resolve(Notifications), { ssr: false, loading: () => <Loading /> });

@@ -6,17 +6,17 @@ import React, { useEffect } from 'react';
 
 function VerifyAuth() {
 
-  const authStore = useAuthStore();
+  const { validateToken } = useAuthStore();
 
   useEffect(() => {
     const validate = async () => {
-      if (await authStore.validateToken()) {
+      if (await validateToken()) {
         //get path from url nextjs
         redirect("/home")
       }
     }
     validate();
-  }, [authStore.access_token, authStore.refresh_token])
+  }, [validateToken])
   return (
     <>
     </>

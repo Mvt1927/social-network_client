@@ -8,6 +8,8 @@ import {
   AxiosResponseSuccessData,
   loginFormSchema,
   registerFormSchema,
+  updateUserProfileSchema,
+  User,
 } from "@/dtos";
 
 const subdirectory = "/auth";
@@ -185,11 +187,63 @@ export const verifyWithToken = async (token: string) => {
       error: undefined,
     };
   } catch (error: unknown) {
+    throw error;
+  }
+};
+
+export const logout = async (refresh_token: string, access_token: string) => {
+  try {
+    return {
+      response: await AXIOS.post(
+        `${subdirectory}/logout`,
+        {
+          refresh_token,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${access_token}`,
+          },
+        },
+      ),
+      error: undefined,
+    };
+  } catch (error: unknown) {
     if (error instanceof AxiosError) {
       return {
         error: error as AxiosError,
       };
     }
+    throw error;
+  }
+};
+
+export const updateProfile = async (
+  data: z.infer<typeof updateUserProfileSchema>,
+  access_token: string,
+): Promise<
+  | {
+      error?: undefined;
+      response: AxiosResponse<
+        AxiosResponseSuccessData<{
+          user: User;
+        }>
+      >;
+    }
+  | {
+      error: AxiosError<AxiosResponseErrorData>;
+      response?: undefined;
+    }
+> => {
+  try {
+    return {
+      response: await AXIOS.patch(`${subdirectory}/profile`, data, {
+        headers: {
+          Authorization: `Bearer ${access_token}`,
+        },
+      }),
+      error: undefined,
+    };
+  } catch (error: unknown) {
     throw error;
   }
 };

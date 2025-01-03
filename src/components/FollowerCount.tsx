@@ -15,10 +15,18 @@ export default function FollowerCount({
 }: FollowerCountProps) {
   const { data } = useFollowerInfo(userId, initialState);
 
+  console.log(data);
+
   return (
+  <>
     <span>
       Followers:{" "}
       <span className="font-semibold">{formatNumber(data.followers)}</span>
     </span>
+    <span>
+      Following:{" "}
+      <span className="font-semibold">{formatNumber(data.following)}</span>
+    </span>
+  </>
   );
 }

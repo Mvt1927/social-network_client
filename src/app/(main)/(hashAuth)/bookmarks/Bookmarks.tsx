@@ -1,13 +1,22 @@
 "use client";
 
+import { getPosts } from "@/apis";
 import InfiniteScrollContainer from "@/components/InfiniteScrollContainer";
 import Post from "@/components/posts/Post";
 import PostsLoadingSkeleton from "@/components/posts/PostsLoadingSkeleton";
-import { PostsPage } from "@/lib/types";
+import { useAuthStore } from "@/stores";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 
 export default function Bookmarks() {
+
+  const { access_token } = useAuthStore();
+
+  const fetchBookeMarkedPosts = async (pageParam: string | null) => {
+    const { response } = await getPosts({ value: 'BOOKMARK' }, access_token, pageParam);
+    return response.data
+  }
+
   const {
     data,
     fetchNextPage,
@@ -18,12 +27,7 @@ export default function Bookmarks() {
   } = useInfiniteQuery({
     queryKey: ["post-feed", "bookmarks"],
     queryFn: ({ pageParam }) =>
-      kyInstance
-        .get(
-          "/api/posts/bookmarked",
-          pageParam ? { searchParams: { cursor: pageParam } } : {},
-        )
-        .json<PostsPage>(),
+      fetchBookeMarkedPosts(pageParam),
     initialPageParam: null as string | null,
     getNextPageParam: (lastPage) => lastPage.nextCursor,
   });

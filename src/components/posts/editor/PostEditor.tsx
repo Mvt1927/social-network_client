@@ -199,7 +199,7 @@ function AttachmentPreviews({
     }
     api.scrollTo(attachments.length - 1 , true)
     
-  }, [attachments.length])
+  }, [attachments.length, api])
 
   useEffect(() => {
     if (!api) {

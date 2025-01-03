@@ -4,12 +4,20 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { z } from "zod";
 
-import { login, refresh, register, requestVerify, verify } from "@/apis";
+import {
+  login,
+  refresh,
+  register,
+  requestVerify,
+  updateProfile,
+  verify,
+} from "@/apis";
 import {
   AxiosResponseErrorData,
   loginFormSchema,
   otpFormSchema,
   registerFormSchema,
+  updateUserProfileSchema,
   User,
 } from "@/dtos";
 import { getExp } from "@/lib/jwt";
@@ -40,6 +48,10 @@ export interface IAuthStore {
   fetchRequestVerify: (data: {
     email: string;
   }) => Promise<{ error: AxiosResponseErrorData | undefined }>;
+
+  fetchUpdateProfile: (
+    data: z.infer<typeof updateUserProfileSchema>,
+  ) => Promise<{ error: AxiosResponseErrorData | undefined, user: User }>;
 
   validateToken: () => Promise<boolean>;
   fethRefreshToken: () => Promise<boolean>;
@@ -168,7 +180,7 @@ export const useAuthStore = create<IAuthStore>()(
       validateToken: async () => {
         if (
           (get().access_token &&
-            Date.now() < (get().access_token_expires_in * 1000 - 60)) ||
+            Date.now() < get().access_token_expires_in * 1000 - 60) ||
           (get().refresh_token &&
             Date.now() < get().refresh_token_expires_in * 1000 &&
             (await get().fethRefreshToken()))
@@ -195,6 +207,25 @@ export const useAuthStore = create<IAuthStore>()(
         get().setAccessToken(token);
         get().setRefreshToken(refreshToken);
         return true;
+      },
+
+      fetchUpdateProfile: async (
+        data: z.infer<typeof updateUserProfileSchema>,
+      ) => {
+        const { error, response } = await updateProfile(
+          data,
+          get().access_token,
+        );
+
+        if (error) {
+          const { response } = error;
+          return { error: response?.data, user: get().user };
+        }
+
+        set({
+          user: response.data.data.user,
+        });
+        return { error: error, user: get().user };
       },
 
       clearUser: () => {

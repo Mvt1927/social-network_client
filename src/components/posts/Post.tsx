@@ -12,12 +12,13 @@ import Linkify from "../Linkify";
 import UserAvatar from "../UserAvatar";
 import UserTooltip from "../UserTooltip";
 import BookmarkButton from "./BookmarkButton";
-import LikeButton from "./LikeButton";
+import ReactionButton from "./ReactionButton";
 import PostMoreButton from "./PostMoreButton";
 import { useAuthStore } from "@/stores";
 
 import loginImage from "@/assets/login-image.jpg"
 import { Card } from "../ui/card";
+import { Dialog, DialogClose, DialogContent, DialogTitle, DialogTrigger } from "../ui/dialog";
 
 interface PostProps {
   post: PostData;
@@ -73,11 +74,11 @@ export default function Post({ post }: PostProps) {
         <hr className="text-muted-foreground" />
         <div className="flex justify-between gap-5">
           <div className="flex items-center gap-5">
-            <LikeButton
+            <ReactionButton
               postId={post.id}
               initialState={{
-                reactions: post._count.reaction,
-                isreactedByUser: post.reaction.some((reaction) => reaction.authorId === user.id),
+                reaction: post._count.reaction,
+                userReactionType: post.reaction.find((reaction) => reaction.authorId === user.id)?.type || null,
               }}
             />
             <CommentButton
@@ -127,13 +128,31 @@ function MediaPreview({ media }: MediaPreviewProps) {
   if (media.type === "IMAGE") {
     return (
       <Suspense fallback={<p>Loading...</p>}>
-        <Image
-          src={media.url || loginImage}
-          alt="Attachment"
-          width={500}
-          height={500}
-          className="mx-auto size-fit max-h-96 rounded-2xl"
-        />
+
+        <Dialog>
+          <DialogTrigger asChild >
+            <Image
+              src={media.url || loginImage}
+              alt={media.id || ''}
+              sizes="100vw"
+              className={"mx-auto size-fit max-h-96 rounded-2xl"}
+              style={{
+                width: '100%',
+                height: 'auto',
+              }}
+              width={500}
+              height={100}
+            />
+          </DialogTrigger>
+          <DialogContent className="max-w-7xl border-0 bg-transparent p-0">
+            <DialogTitle>
+              <div className="h-[calc(100vh-220px)] overflow-clip rounded-md bg-transparent shadow-md">
+                <DialogClose></DialogClose>
+                <Image src={media.url || loginImage} fill alt={media.id || ''} className="h-full w-full object-contain" />
+              </div>
+            </DialogTitle>
+          </DialogContent>
+        </Dialog>
       </Suspense>
     );
   }

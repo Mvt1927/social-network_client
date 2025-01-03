@@ -1,3 +1,5 @@
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import UserAvatar from "@/components/UserAvatar";
 import { NotificationData } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -12,69 +14,94 @@ interface NotificationProps {
 export default function Notification({ notification }: NotificationProps) {
   const notificationTypeMap: Record<
     NotificationType,
-    { message: string; icon: JSX.Element; href: string }
+    { message: string; icon: JSX.Element; href: string, issuerHref: string }
   > = {
     FOLLOW: {
-      message: `${notification.issuer.fullname} followed you`,
+      message: `${notification.issuer.fullname || `@${notification.issuer.username}`} followed you`,
       icon: <User2 className="size-7 text-primary" />,
       href: `/users/${notification.issuer.username}`,
+      issuerHref: `/users/${notification.issuer.username}`,
     },
     COMMENT: {
-      message: `${notification.issuer.fullname} commented on your post`,
+      message: `${notification.issuer.fullname || `@${notification.issuer.username}`} commented on your post`,
       icon: <MessageCircle className="size-7 fill-primary text-primary" />,
       href: `/posts/${notification.postId}`,
+      issuerHref: `/users/${notification.issuer.username}`,
     },
     REACTION: {
-      message: `${notification.issuer.fullname} liked your post`,
+      message: `${notification.issuer.fullname || `@${notification.issuer.username}`} liked your post`,
       icon: <Heart className="size-7 fill-red-500 text-red-500" />,
       href: `/posts/${notification.postId}`,
+      issuerHref: `/users/${notification.issuer.username}`,
     },
     CHAT_SEND_MESSAGE: {
-      message: `${notification.issuer.fullname} sent you a message`,
+      message: `${notification.issuer.fullname || `@${notification.issuer.username}`} sent you a message`,
       icon: <MessageCircle className="size-7 fill-primary text-primary" />,
       href: `/users/${notification.chat?.authorId}/messages?message=${notification.chatId}`,
+      issuerHref: `/users/${notification.issuer.username}`,
     },
     COMMENT_REPLY: {
-      message: `${notification.issuer.fullname} replied to your comment`,
+      message: `${notification.issuer.fullname || `@${notification.issuer.username}`} replied to your comment`,
       icon: <MessageCircle className="size-7 fill-primary text-primary" />,
       href: `/posts/${notification.postId}`,
+      issuerHref: `/users/${notification.issuer.username}`,
     },
     FRIEND_REQUEST: {
-      message: `${notification.issuer.fullname} sent you a friend request`,
+      message: `${notification.issuer.fullname || `@${notification.issuer.username}`} sent you a friend request`,
       icon: <User2 className="size-7 text-primary" />,
       href: `/users/${notification.issuer.username}`,
+      issuerHref: `/users/${notification.issuer.username}`,
     },
     GROUP_CHAT_SEND_MESSAGE: {
-      message: `${notification.issuer.fullname} sent a message in the group chat`,
+      message: `${notification.issuer.fullname || `@${notification.issuer.username}`} sent a message in the group chat`,
       icon: <MessageCircle className="size-7 fill-primary text-primary" />,
       href: `/groups/${notification.groupChat?.groupId}/messages?message=${notification.groupChat?.id}`,
+      issuerHref: `/users/${notification.issuer.username}`,
     },
   };
 
-  const { message, icon, href } = notificationTypeMap[notification.type];
+  const { message, icon, href, issuerHref } = notificationTypeMap[notification.type];
 
   return (
+
     <Link href={href} className="block">
-      <article
+      <Card
         className={cn(
-          "flex gap-3 rounded-2xl bg-card p-5 shadow-sm transition-colors hover:bg-card/70",
+          "flex flex-col rounded-2xl bg-card shadow-sm transition-colors hover:bg-card/70",
           !notification.read && "bg-primary/10",
         )}
       >
-        <div className="my-1">{icon}</div>
-        <div className="space-y-3">
-          <UserAvatar avatarUrl={notification.issuer.avatarUrl} size={36} />
+        <CardHeader>
+          <div className="flex gap-2">
+            <div className="my-1">{icon}</div>
+            <Button asChild
+              variant="ghost"
+              className="flex-1 flex items-center justify-start"
+            >
+              <Link href={issuerHref}>
+                <div className="flex gap-2">
+                  <UserAvatar avatarUrl={notification.issuer.avatarUrl} size={36} />
+                  <div>
+                    <span className="font-bold">{notification.issuer.fullname || `@${notification.issuer.username}`}</span>{" "}
+                  </div>
+                </div>
+              </Link>
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
           <div>
-            <span className="font-bold">{notification.issuer.fullname}</span>{" "}
             <span>{message}</span>
           </div>
+        </CardContent>
+        <CardFooter>
           {notification.post && (
             <div className="line-clamp-3 whitespace-pre-line text-muted-foreground">
               {notification.post.message.content}
             </div>
           )}
-        </div>
-      </article>
+        </CardFooter>
+      </Card>
     </Link>
   );
 }

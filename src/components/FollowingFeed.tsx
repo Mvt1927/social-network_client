@@ -5,10 +5,11 @@ import PostsLoadingSkeleton from "@/components/posts/PostsLoadingSkeleton";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { useAuthStore } from "@/stores";
-import { getPost } from "@/apis";
+import { getPosts } from "@/apis";
 import Post from "@/components/posts/Post";
+import dynamic from "next/dynamic";
 
-export default function FollowingFeed() {
+function FollowingFeed() {
 
   const { access_token } = useAuthStore();
 
@@ -23,7 +24,7 @@ export default function FollowingFeed() {
     queryKey: ["post-feed", "following"],
     queryFn: async ({ pageParam }) => {
 
-      const { response } = await getPost({
+      const { response } = await getPosts({
         value: "FOLLOWING"
       }, access_token, pageParam
       )
@@ -68,3 +69,4 @@ export default function FollowingFeed() {
     </InfiniteScrollContainer>
   );
 }
+export default dynamic(() => Promise.resolve(FollowingFeed), { ssr: false, loading: () => <PostsLoadingSkeleton /> });

@@ -30,8 +30,24 @@ export const markNotificationsAsRead = async (access_token: string) => {
         },
       }),
     };
-  }
-  catch (error: unknown) {
+  } catch (error: unknown) {
     throw error;
   }
-}
+};
+
+export const getUnreadNotificationsCount = async (access_token: string) => {
+  try {
+    return {
+      response: await AXIOS.get<{ unreadCount: number }>(
+        `${subdirectory}/unread-count`,
+        {
+          headers: {
+            Authorization: `Bearer ${access_token}`,
+          },
+        },
+      ),
+    };
+  } catch (error: unknown) {
+    throw error;
+  }
+};

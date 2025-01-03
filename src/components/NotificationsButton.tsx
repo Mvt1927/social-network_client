@@ -1,7 +1,9 @@
 "use client";
 
+import { getUnreadNotificationsCount } from "@/apis";
 import { Button } from "@/components/ui/button";
 import { NotificationCountInfo } from "@/lib/types";
+import { useAuthStore } from "@/stores";
 import { useQuery } from "@tanstack/react-query";
 import { Bell } from "lucide-react";
 import Link from "next/link";
@@ -14,16 +16,23 @@ export default function NotificationsButton({
   initialState,
 }: NotificationsButtonProps) {
 
-  const getNotificationsCount = async () => {
-    //requires authentication
-    return {
-      unreadCount: 10,
-    };
+
+  const { access_token } = useAuthStore();
+
+  const getNotificationsCount = async (
+    access_token: string,
+  ) => {
+    const { response } = await getUnreadNotificationsCount(
+      access_token,
+    )
+    return response.data;
   }
 
   const { data } = useQuery({
     queryKey: ["unread-notification-count"],
-    queryFn: () => getNotificationsCount(),
+    queryFn: () => getNotificationsCount(
+      access_token
+    ),
     initialData: initialState,
     refetchInterval: 60 * 1000,
   });

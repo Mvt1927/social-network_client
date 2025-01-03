@@ -7,10 +7,10 @@ import React, { useEffect } from 'react';
 function VerifyEmailAuth() {
 
   const { user, validateToken } = useAuthStore();
-  const [clientLoaded, setClienLoaded] = React.useState(false);
+  const [clientLoaded, setClientLoaded] = React.useState(false);
 
   useEffect(() => {
-    setClienLoaded(true);
+    setClientLoaded(true);
   }, []
   )
 
@@ -23,7 +23,7 @@ function VerifyEmailAuth() {
       }
     }
     validate();
-  }, [user.id, clientLoaded])
+  }, [user.id, clientLoaded,validateToken, user.isVerified])
   return (
     <>
     </>

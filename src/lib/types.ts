@@ -1,4 +1,4 @@
-import { $Enums, Prisma } from '@prisma/client';
+import { $Enums, Prisma, ReactionType } from '@prisma/client';
 export function getUserDataSelect(loggedInUserId: string) {
   return {
     id: true,
@@ -19,6 +19,7 @@ export function getUserDataSelect(loggedInUserId: string) {
       select: {
         posts: true,
         followers: true,
+        following: true,
       },
     },
   } satisfies Prisma.UserSelect;
@@ -44,6 +45,7 @@ export function getPostDataInclude(loggedInUserId: string) {
       },
       select: {
         authorId: true,
+        type: true,
       },
     },
     bookmarks: {
@@ -134,13 +136,14 @@ export interface NotificationsPage {
 
 export interface FollowerInfo {
   followers: number;
+  following: number;
   isFollowedByUser: boolean;
 }
 
 export interface ReactionInfo {
-  reactions: number;
-  isreactedByUser: boolean;
-}
+  reaction: number;
+  userReactionType: ReactionType | null;
+};
 
 export interface BookmarkInfo {
   isBookmarkedByUser: boolean;

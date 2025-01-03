@@ -1,18 +1,29 @@
 "use client";
 
+import { getPostsByUser } from "@/apis";
 import InfiniteScrollContainer from "@/components/InfiniteScrollContainer";
 import Post from "@/components/posts/Post";
 import PostsLoadingSkeleton from "@/components/posts/PostsLoadingSkeleton";
-import kyInstance from "@/lib/ky";
-import { PostsPage } from "@/lib/types";
+// import kyInstance from "@/lib/ky";
+import { useAuthStore } from "@/stores";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
+import dynamic from "next/dynamic";
 
 interface UserPostsProps {
   userId: string;
 }
 
-export default function UserPosts({ userId }: UserPostsProps) {
+function UserPosts({ userId }: UserPostsProps) {
+
+  const { access_token } = useAuthStore();
+
+  const featchUserPosts = async (pageParam: string | null) => {
+    const { response } = await getPostsByUser(userId, access_token, pageParam);
+    console.log(response.data);
+    return response.data;
+  }
+
   const {
     data,
     fetchNextPage,
@@ -23,12 +34,7 @@ export default function UserPosts({ userId }: UserPostsProps) {
   } = useInfiniteQuery({
     queryKey: ["post-feed", "user-posts", userId],
     queryFn: ({ pageParam }) =>
-      kyInstance
-        .get(
-          `/api/users/${userId}/posts`,
-          pageParam ? { searchParams: { cursor: pageParam } } : {},
-        )
-        .json<PostsPage>(),
+      featchUserPosts(pageParam),
     initialPageParam: null as string | null,
     getNextPageParam: (lastPage) => lastPage.nextCursor,
   });
@@ -67,3 +73,4 @@ export default function UserPosts({ userId }: UserPostsProps) {
     </InfiniteScrollContainer>
   );
 }
+export default dynamic(() => Promise.resolve(UserPosts), { ssr: false, loading: () => <Loader2 className="mx-auto animate-spin" /> });

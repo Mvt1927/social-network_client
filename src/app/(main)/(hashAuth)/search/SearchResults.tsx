@@ -1,17 +1,22 @@
 "use client";
 
+import { searchPosts } from "@/apis";
 import InfiniteScrollContainer from "@/components/InfiniteScrollContainer";
 import Post from "@/components/posts/Post";
 import PostsLoadingSkeleton from "@/components/posts/PostsLoadingSkeleton";
-import { PostsPage } from "@/lib/types";
+import { useAuthStore } from "@/stores";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
+import dynamic from "next/dynamic";
 
 interface SearchResultsProps {
   query: string;
 }
 
-export default function SearchResults({ query }: SearchResultsProps) {
+function SearchResults({ query }: SearchResultsProps) {
+
+  const { access_token } = useAuthStore();
+
   const {
     data,
     fetchNextPage,
@@ -21,15 +26,10 @@ export default function SearchResults({ query }: SearchResultsProps) {
     status,
   } = useInfiniteQuery({
     queryKey: ["post-feed", "search", query],
-    queryFn: ({ pageParam }) =>
-      kyInstance
-        .get("/api/search", {
-          searchParams: {
-            q: query,
-            ...(pageParam ? { cursor: pageParam } : {}),
-          },
-        })
-        .json<PostsPage>(),
+    queryFn: async ({ pageParam }) => {
+      const { response } = await searchPosts(query, access_token, pageParam);
+      return response.data;
+    },
     initialPageParam: null as string | null,
     getNextPageParam: (lastPage) => lastPage.nextCursor,
     gcTime: 0,
@@ -69,3 +69,5 @@ export default function SearchResults({ query }: SearchResultsProps) {
     </InfiniteScrollContainer>
   );
 }
+
+export default dynamic(() => Promise.resolve(SearchResults), { ssr: false, loading: () => <Loader2 className="mx-auto animate-spin" /> });

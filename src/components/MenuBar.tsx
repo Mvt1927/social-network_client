@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Bookmark, Home, Loader2 } from "lucide-react";
 import Link from "next/link";
-import MessagesButton from "./MessagesButton";
+import FollowersButton from "./MessagesButton";
 import NotificationsButton from "./NotificationsButton";
 import { Card } from "@/components/ui/card";
 import { Suspense } from "react";
@@ -16,7 +16,7 @@ export default function MenuBar({ className }: MenuBarProps) {
 
 
 
-  const [unreadNotificationsCount, unreadMessagesCount] = [0, 0]
+  const [unreadNotificationsCount] = [0]
 
   return (
     <div className="sticky top-20 hidden h-fit sm:block flex-none space-y-5 2xl:w-80">
@@ -28,7 +28,7 @@ export default function MenuBar({ className }: MenuBarProps) {
             title="Home"
             asChild
           >
-            <Link href="/">
+            <Link href="/home">
               <Home />
               <span className="hidden lg:inline">Home</span>
             </Link>
@@ -36,7 +36,7 @@ export default function MenuBar({ className }: MenuBarProps) {
           <NotificationsButton
             initialState={{ unreadCount: unreadNotificationsCount }}
           />
-          <MessagesButton initialState={{ unreadCount: unreadMessagesCount }} />
+          <FollowersButton />
           <Button
             variant="ghost"
             className="flex items-center justify-start gap-3"

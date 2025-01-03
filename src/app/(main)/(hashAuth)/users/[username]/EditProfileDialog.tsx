@@ -20,10 +20,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { UserData } from "@/lib/types";
-import {
-  updateUserProfileSchema,
-  UpdateUserProfileValues,
-} from "@/lib/validation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Camera } from "lucide-react";
 import Image, { StaticImageData } from "next/image";
@@ -31,6 +27,7 @@ import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import Resizer from "react-image-file-resizer";
 import { useUpdateProfileMutation } from "./mutations";
+import { updateUserProfileSchema, UpdateUserProfileValues } from "@/dtos";
 
 interface EditProfileDialogProps {
   user: UserData;
@@ -46,8 +43,9 @@ export default function EditProfileDialog({
   const form = useForm<UpdateUserProfileValues>({
     resolver: zodResolver(updateUserProfileSchema),
     defaultValues: {
-      displayName: user.displayName,
+      fullname: user.fullname || "",
       bio: user.bio || "",
+      avatarUrl: user.avatarUrl || undefined,
     },
   });
 
@@ -95,12 +93,12 @@ export default function EditProfileDialog({
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
             <FormField
               control={form.control}
-              name="displayName"
+              name="fullname"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Display name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Your display name" {...field} />
+                    <Input placeholder="Your Full Name" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

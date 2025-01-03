@@ -4,11 +4,13 @@ import InfiniteScrollContainer from "@/components/InfiniteScrollContainer";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import Loading from "../app/(main)/loading";
-import { getPost } from "@/apis";
+import { getPosts } from "@/apis";
 import { useAuthStore } from "@/stores";
 import Post from "@/components/posts/Post";
+import PostsLoadingSkeleton from "./posts/PostsLoadingSkeleton";
+import dynamic from "next/dynamic";
 
-export default function ForYouFeed() {
+function ForYouFeed() {
 
   const { access_token } = useAuthStore();
   const {
@@ -22,7 +24,7 @@ export default function ForYouFeed() {
     queryKey: ["post-feed", "for-you"],
     queryFn: async ({ pageParam }) => {
 
-      const { response } = await getPost({
+      const { response } = await getPosts({
         value: "FOR_YOU"
       }, access_token, pageParam
       )
@@ -70,3 +72,4 @@ export default function ForYouFeed() {
     </InfiniteScrollContainer>
   );
 }
+export default dynamic(() => Promise.resolve(ForYouFeed), { ssr: false, loading: () => <PostsLoadingSkeleton /> });
