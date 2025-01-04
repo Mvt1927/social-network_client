@@ -19,6 +19,7 @@ import { useAuthStore } from "@/stores"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "./ui/form"
 import LoadingButton from "./LoadingButton"
 import { PasswordInput } from "./ui/input-password";
+import { redirect } from "next/navigation";
 
 export function SignupForm() {
 
