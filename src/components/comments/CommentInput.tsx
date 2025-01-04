@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { useSubmitCommentMutation } from "./mutations";
+import { useCopilotAction, useCopilotReadable } from "@copilotkit/react-core";
 
 interface CommentInputProps {
   post: PostData;
@@ -11,6 +12,26 @@ interface CommentInputProps {
 
 export default function CommentInput({ post }: CommentInputProps) {
   const [input, setInput] = useState("");
+
+  useCopilotReadable({
+    description: "The input field for writing a comment.",
+    value: input,
+  });
+
+  useCopilotAction({
+    name: "submitComment",
+    description: "Submit a comment to the post.",
+    handler: () => {
+      mutation.mutate(
+        {
+          content: input,
+        },
+        {
+          onSuccess: () => setInput(""),
+        },
+      )
+    },
+  });
 
   const mutation = useSubmitCommentMutation(post.id);
 

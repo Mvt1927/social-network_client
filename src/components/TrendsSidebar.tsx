@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader } from "./ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { UserData } from "@/lib/types";
 import { getUserToFollow } from "@/apis/user.api";
+import { useCopilotReadable } from "@copilotkit/react-core";
 // import { TrendingTopics } from "./TrendingTopic";
 
 const TrendingTopics = dynamic(() => import("./TrendingTopic").then((mod) => mod.TrendingTopics));
@@ -45,6 +46,11 @@ export function useGetUserToFollow() {
 
 function WhoToFollow() {
   const { data: usersToFollow, status } = useGetUserToFollow();
+
+  useCopilotReadable({
+    description: "The list of users non followed by the current user.",
+    value: usersToFollow,
+  });
 
   return (
     <Card className="">

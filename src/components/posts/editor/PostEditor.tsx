@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { useDropzone } from "@uploadthing/react";
+import { useCopilotAction, useCopilotReadable } from "@copilotkit/react-core";
 import { Card } from "@/components/ui/card";
 // import EditorToolbar from "@/components/rich-text/toolbar/editor-toolbar";
 import { TextAreaComponent } from "@/components/TextAreaComponent";
@@ -48,6 +49,37 @@ export default function PostEditor() {
 
   const [input, setInput] = useState("");
 
+  useCopilotReadable({
+    description: "Nội dung bài đăng của người dùng",
+    value: input,
+  });
+
+
+  useCopilotAction({
+    name: "addContentAction",
+    description: "Thêm nội dung vào bài đăng",
+    parameters: [
+      {
+        name: "contentText",
+        type: "string",
+        description: "Nội dung bài đăng cần thêm",
+        required: true,
+      },
+    ],
+    handler: async ({ contentText }) => {
+      setInput(input + contentText);
+    },
+  });
+
+  useCopilotAction({
+    name: "clearContentAction",
+    description: "Xóa nội dung bài đăng",
+    handler: async () => {
+      setInput("");
+    },
+  });
+
+
   function onSubmit() {
     const inputAttachments = attachments.map(({ data }) => {
       const attachment = mediaSchema.parse({
@@ -73,6 +105,13 @@ export default function PostEditor() {
 
     console.log(attachments);
   }
+
+  useCopilotAction({
+    name: "submitPostAction",
+    description: "Submit bài đăng",
+    handler: onSubmit,
+  });
+
 
   function onPaste(e: ClipboardEvent<HTMLInputElement>) {
     const files = Array.from(e.clipboardData.items)
@@ -190,15 +229,15 @@ function AttachmentPreviews({
       return
     }
     setCurrent(api.selectedScrollSnap() + 1)
-  
+
   }, [api, attachments.length])
 
   useEffect(() => {
     if (!api) {
       return
     }
-    api.scrollTo(attachments.length - 1 , true)
-    
+    api.scrollTo(attachments.length - 1, true)
+
   }, [attachments.length, api])
 
   useEffect(() => {

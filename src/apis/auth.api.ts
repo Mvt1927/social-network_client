@@ -247,3 +247,35 @@ export const updateProfile = async (
     throw error;
   }
 };
+
+export const requestPasswordChange = async (email: string) => {
+  try {
+    return {
+      response: await AXIOS.post(`${subdirectory}/request-change-password`, {
+        email,
+      }),
+      error: undefined,
+    };
+  } catch (error: unknown) {
+    throw error;
+  }
+};
+
+export const changePassword = async (newPassword: string, token: string) => {
+  try {
+    return {
+      response: await AXIOS.patch(
+        `${subdirectory}/change-password`,
+        { newPassword },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      ),
+      error: undefined,
+    };
+  } catch (error: unknown) {
+    throw error;
+  }
+};

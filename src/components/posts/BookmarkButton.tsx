@@ -3,6 +3,7 @@ import { useToast } from "@/hooks/use-toast";
 import { BookmarkInfo } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores";
+import { useCopilotAction, useCopilotReadable } from "@copilotkit/react-core";
 import {
   QueryKey,
   useMutation,
@@ -79,6 +80,22 @@ export default function BookmarkButton({
         description: "Something went wrong. Please try again.",
       });
     },
+  });
+
+  useCopilotReadable({
+    description: "postId của bài đăng này",
+    value: postId,
+  });
+
+  useCopilotReadable({
+    description: "thông tin bookmark của bài đăng này",
+    value: data,
+  });
+
+  useCopilotAction({
+    name: "bookmarkAction",
+    description: "Bookmark this post, nếu đã bookmark thì unbookmark",
+    handler: mutate,
   });
 
   return (

@@ -3,12 +3,12 @@
 import InfiniteScrollContainer from "@/components/InfiniteScrollContainer";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
-import Loading from "../app/(main)/loading";
 import { getPosts } from "@/apis";
 import { useAuthStore } from "@/stores";
 import Post from "@/components/posts/Post";
 import PostsLoadingSkeleton from "./posts/PostsLoadingSkeleton";
 import dynamic from "next/dynamic";
+import { useCopilotReadable } from "@copilotkit/react-core";
 
 function ForYouFeed() {
 
@@ -37,9 +37,13 @@ function ForYouFeed() {
 
   const posts = data?.pages.flatMap((page) => page.posts) || [];
 
+  useCopilotReadable({
+    description: "The list of posts in the for you feed.",
+    value: posts,
+  });
 
   if (status === "pending") {
-    return <Loading />;
+    return <PostsLoadingSkeleton />;
   }
 
   if (status === "success" && !posts.length && !hasNextPage) {

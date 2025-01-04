@@ -8,6 +8,7 @@ import { useAuthStore } from "@/stores";
 import { getPosts } from "@/apis";
 import Post from "@/components/posts/Post";
 import dynamic from "next/dynamic";
+import { useCopilotReadable } from "@copilotkit/react-core";
 
 function FollowingFeed() {
 
@@ -36,6 +37,11 @@ function FollowingFeed() {
   });
 
   const posts = data?.pages.flatMap((page) => page.posts) || [];
+
+  useCopilotReadable({
+    description: "The list of posts in the following feed.",
+    value: posts,
+  });
 
   if (status === "pending") {
     return <PostsLoadingSkeleton />;

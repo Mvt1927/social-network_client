@@ -56,6 +56,9 @@ export function SignupForm() {
           })
         }
       }
+      else {
+        redirect("/home");
+      }
     });
   }
 

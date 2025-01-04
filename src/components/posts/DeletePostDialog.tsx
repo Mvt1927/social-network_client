@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from "../ui/dialog";
 import { useDeletePostMutation } from "./mutations";
+import { useCopilotAction, useCopilotReadable } from "@copilotkit/react-core";
 
 interface DeletePostDialogProps {
   post: PostData;
@@ -24,11 +25,34 @@ export default function DeletePostDialog({
 }: DeletePostDialogProps) {
   const mutation = useDeletePostMutation();
 
+
+
   function handleOpenChange(open: boolean) {
     if (!open || !mutation.isPending) {
       onClose();
     }
   }
+
+  useCopilotReadable({
+    description: "Nội dung bài đăng cần xóa",
+    value: post,
+  });
+
+  useCopilotAction({
+    name: "deletePostAction",
+    description: "Xóa bài đăng của post này",
+    parameters: [
+      {
+        name: "postId",
+        type: "string",
+        description: "ID của bài đăng cần xóa",
+        required: true,
+      },
+    ],
+    handler: async ({ postId }) => {
+      mutation.mutate(postId, { onSuccess: onClose });
+    }
+  });
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>

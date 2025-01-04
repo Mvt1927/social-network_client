@@ -14,6 +14,7 @@ import {
 } from "./ui/tooltip";
 import UserAvatar from "./UserAvatar";
 import { useAuthStore } from "@/stores";
+import { useCopilotReadable } from "@copilotkit/react-core";
 
 interface UserTooltipProps extends PropsWithChildren {
   user: UserData;
@@ -29,6 +30,16 @@ export default function UserTooltip({ children, user }: UserTooltipProps) {
       ({ followerId }) => followerId === loggedInUser.id,
     ),
   };
+
+  useCopilotReadable({
+    description: "The user tooltip.",
+    value: user,
+  });
+
+  useCopilotReadable({
+    description: "The follower state of the user.",
+    value: followerState,
+  });
 
   return (
     <TooltipProvider>

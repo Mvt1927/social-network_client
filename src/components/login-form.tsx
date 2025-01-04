@@ -21,6 +21,7 @@ import { useAuthStore } from "@/stores"
 import { loginFormSchema } from "@/dtos"
 import { toast } from "@/hooks/use-toast"
 import { PasswordInput } from "./ui/input-password"
+import { redirect } from "next/navigation"
 
 export function LoginForm() {
 
@@ -65,6 +66,9 @@ export function LoginForm() {
         }
 
 
+      }
+      else {
+        redirect("/home");
       }
     });
   }

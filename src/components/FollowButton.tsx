@@ -7,6 +7,7 @@ import { Button } from "./ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { followUser, unfollowUser } from "@/apis/user.api";
 import { useAuthStore } from "@/stores";
+import { useCopilotAction, useCopilotReadable } from "@copilotkit/react-core";
 
 interface FollowButtonProps {
   userId: string;
@@ -27,7 +28,7 @@ export default function FollowButton({
 
   const { access_token } = useAuthStore();
 
-  const fetchFollow = async () => {
+  const fetchFollow = async (userId: string) => {
     if (!data.isFollowedByUser) {
       await followUser(userId, access_token);
     } else {
@@ -35,8 +36,10 @@ export default function FollowButton({
     }
   }
 
+
+
   const { mutate } = useMutation({
-    mutationFn: () => fetchFollow(),
+    mutationFn: ({ userId }: { userId: string }) => fetchFollow(userId),
     onMutate: async () => {
       await queryClient.cancelQueries({ queryKey });
 
@@ -62,10 +65,32 @@ export default function FollowButton({
     },
   });
 
+  useCopilotReadable({
+    description: "FollowerInfo of a user.",
+    value: data,
+  });
+
+  useCopilotAction({
+    name: "followAction",
+    description: "Follow or unfollow a user.",
+    parameters: [
+      {
+        name: "userId",
+        type: "string",
+        description: "The id of the user you want to follow or unfollow.",
+        required: true,
+        value: userId,
+      },
+    ],
+    handler: ({ userId }) => {
+      mutate({ userId });
+    },
+  });
+
   return (
     <Button
       variant={data.isFollowedByUser ? "secondary" : "default"}
-      onClick={() => mutate()}
+      onClick={() => mutate({ userId })}
     >
       {data.isFollowedByUser ? "Unfollow" : "Follow"}
     </Button>

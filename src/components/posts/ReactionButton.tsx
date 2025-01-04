@@ -4,6 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ReactionInfo } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores";
+import { useCopilotAction, useCopilotReadable } from "@copilotkit/react-core";
 import { ReactionType } from "@prisma/client";
 import {
   QueryKey,
@@ -78,6 +79,20 @@ export default function ReactionButton({ postId, initialState }: ReactionButtonP
         variant: "destructive",
         description: "Something went wrong. Please try again.",
       });
+    },
+  });
+
+
+  useCopilotReadable({
+    description: "Thông tin về số lượng lượt reaction của bài đăng và trạng thái reaction của người dùng",
+    value: data,
+  });
+
+  useCopilotAction({
+    name: "toggleLikeAction",
+    description: "Thích hoặc bỏ thích bài đăng",
+    handler: async () => {
+      mutate();
     },
   });
 

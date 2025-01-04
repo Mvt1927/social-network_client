@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useAuthStore } from "@/stores";
 import { getTrendingTags } from "@/apis";
 import { useQuery } from "@tanstack/react-query";
+import { useCopilotReadable } from "@copilotkit/react-core";
 
 export function useGetTrendingTopics() {
 
@@ -30,6 +31,11 @@ export function useGetTrendingTopics() {
 
 export function TrendingTopics() {
   const { data: trendingTopics, status } = useGetTrendingTopics();
+
+  useCopilotReadable({
+    description: "The list of trending hashtag.",
+    value: trendingTopics,
+  });
 
   if (status === "error" || trendingTopics.length === 0) {
     return null;
